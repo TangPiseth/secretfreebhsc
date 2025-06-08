@@ -1,0 +1,251 @@
+-- [[ By doctor ]] --
+-- gw gk peduli di resell, yang beli sama reseller sih dongo
+
+
+
+local WORLD = GetWorld().name
+LogToConsole("IN world: "..WORLD)
+
+delayPT = 100 --delay plant 100
+delayHT = 80 --jgn di bawah 50 minimal 50
+
+bcg = 4944 -- background di magplant (taro background terserah di magplant)
+loopCount = 4 --loop mau brp kali, kalau unli "unli"
+local ptht = "PTHT" -- "PTHT" / "PT" / "HT" / "HTPT"
+IdSeed = 14853 --id seed pog
+
+world = "island" -- island aja jgn di ubah ubah
+local MagplantLimit = 200 --delay ganti take magplant 
+local MagplantTotal = 2 --total magplant 
+
+function IsReady(tile)
+    return tile.extra.progress == 1
+end
+
+local ex, ey
+if world == "island" then
+    ex = 199 -- jgn ubah kontol
+    ey = GetLocal().pos.y // 32 -- jgn ubah kontol
+end
+
+local RemoteEmpty = true
+local Limiter = 0
+local CurrentMagplant = 1
+local Magplants
+
+function path(x, y, state)
+    SendPacketRaw(false, {
+        state = state,
+        px = x,
+        py = y,
+        x = x * 32,
+        y = y * 32
+    })
+end
+
+function h2(x, y, id)
+    SendPacketRaw(false, {
+        type = 3,
+        value = id,
+        px = x,
+        py = y,
+        x = x * 32,
+        y = y * 32
+    })
+end
+
+function getTree()
+    local count = 0
+    for y = ey, 0, -1 do
+        for x = 0, ex, 1 do
+            local tile = GetTile(x, y)
+            if tile.fg == 0 and GetTile(x, y + 1).fg ~= 0 and GetTile(x, y + 1).fg % 2 == 0 then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
+function getReady()
+    local ready = 0
+    for y = ey, 0, -1 do
+        for x = 0, ex, 1 do
+            local tile = GetTile(x, y)
+            if tile.fg == IdSeed and IsReady(tile) then
+                ready = ready + 1
+            end
+        end
+    end
+    return ready
+end
+
+function getMagplant()
+    local found = {}
+    for x = 0, 199 do
+        for y = 0, 199 do
+            if GetTile(x, y).bg == bcg and GetTile(x, y).fg == 5638 then
+                table.insert(found, { x, y })
+            end
+        end
+    end
+    return found
+end
+
+function getRemote()
+    local pos = Magplants[CurrentMagplant]
+    if pos then
+        path(pos[1], pos[2], 32)
+        Sleep(500)
+        h2(pos[1], pos[2], 32)
+        Sleep(500)
+        SendPacket(2, "action|dialog_return\ndialog_name|magplant_edit\nx|" .. pos[1] .. "|\ny|" .. pos[2] .. "|\nbuttonClicked|getRemote")
+        Sleep(5000)
+        RemoteEmpty = false
+    else
+        RemoteEmpty = true
+    end
+end
+
+function uws()
+    if GetWorld().name ~= WORLD then return end
+    if getTree() == 0 then
+        Sleep(500)
+        SendPacket(2, "action|dialog_return\ndialog_name|ultraworldspray")
+        Sleep(2000)
+        harvest()
+    elseif getTree() ~= 0 then
+        plant()
+        Sleep(1000)
+    end
+end
+
+function harvest()
+    if GetWorld().name ~= WORLD or RemoteEmpty then return end
+
+    if ptht == "PTHT" or ptht == "HT" or ptht == "HTPT" then
+        if getReady() > 0 then
+            for y = ey, 0, -2 do
+                LogToConsole("`4[ `cDoctor `4] `0Harvest on `9Line`2 = `8" .. y)
+                for x = 0, ex, 1 do
+                    local tile = GetTile(x, y)
+                    if tile.fg == IdSeed and IsReady(tile) then
+                        path(x, y, 5640)
+                        Sleep(150)
+                        h2(x, y, 18)
+                        Sleep(delayHT)
+                    end
+                end
+            end
+        end
+    end
+end
+limit = 0
+function plant()
+  for y = ey, 0, -2 do
+    if GetWorld().name ~= WORLD or RemoteEmpty then
+      return
+    else
+      if ptht == "PTHT" or ptht == "PT" or ptht == "HTPT" then
+        if getReady() < 20000 then
+          for i = 1, 2, 1 do
+            for x = (i == 1 and 0 or ex), (i == 1 and ex or 0), (i == 1 and 10 or -10) do
+              if GetWorld().name ~= WORLD or RemoteEmpty then
+                return
+              else
+                LogToConsole("`4[ `cDoctor `4] `8Plant on `9Line`^ = `c" .. y)
+                local tile = GetTile(x, y)
+                if tile.fg == 0 and GetTile(x, y + 1).fg ~= 0 and GetTile(x, y + 1).fg % 2 == 0 then
+                  path(x, y, (i == 1 and 32 or 48))
+                  Sleep(1)
+                  h2(x, y, 5640)
+                  Sleep(delayPT)
+                  if GetWorld().name ~= WORLD or RemoteEmpty then
+                    return
+                  else
+                    px = (i == 1 and math.max(x - 1, 0) or math.min(x + 1, 199))
+                    if GetTile(px, y).fg == IdSeed then
+                      limit = 0
+                    else
+                      if GetTile(px, y).fg ~= IdSeed then
+                        limit = limit + 1
+                      end
+                    end
+                  end
+                  if limit >= 50 then
+                    CurrentMagplant = CurrentMagplant + 1
+                    RemoteEmpty = true
+                    limit = false 
+                    return
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end
+
+function reconnect()
+    if GetWorld().name ~= WORLD then
+        SendPacket(3, "action|join_request\nname|" .. WORLD .. "|\ninvitedWorld|0")
+        RemoteEmpty = true
+    else
+        if RemoteEmpty then
+            getRemote()
+            if RemoteEmpty and CurrentMagplant < #Magplants then
+                CurrentMagplant = CurrentMagplant + 1
+                getRemote()
+            end
+        end
+        rotation()
+    end
+end
+
+function rotation()
+    if GetWorld().name ~= WORLD then return end
+    if Plant then
+        plant()
+    else
+        harvest()
+    end
+end
+
+if ptht == "PTHT" then
+    Plant = true
+    Harvest = true
+elseif ptht == "PT" then
+    Plant = true
+    Harvest = false
+elseif ptht == "HT" then
+    Plant = false
+    Harvest = true
+elseif ptht == "HTPT" then
+    Plant = true
+    Harvest = true
+end
+
+for i = 1, 3 do
+    SendPacket(2, "action|input\n|text|`4[ `cMade by Doctor `4] `bCount `9" .. ptht .. " : `8" .. loopCount)
+    Sleep(1000)
+end
+
+Magplants = getMagplant()
+
+if loopCount == "unli" then
+    while true do
+        reconnect()
+    end
+elseif tonumber(loopCount) then
+    local i = 0
+    repeat
+        i = i + 1
+        reconnect()
+        SendPacket(2, "action|input\n|text|`9PTHT ROTATION(halo) : " .. i .. "`b/`c" .. loopCount)
+        Sleep(4000)
+    until i == tonumber(loopCount)
+    SendPacket(2, "action|input\n|text|`9PTHT DONE (troll) `c" .. loopCount)
+    Sleep(3000)
+end

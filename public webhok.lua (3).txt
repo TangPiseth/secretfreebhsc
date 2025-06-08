@@ -1,0 +1,272 @@
+--[[
+    You Are An Idiot On The World
+     dumbs?
+    Credit Doctor A.K.A Residents
+]]
+
+debug = {
+    pnb = {
+        pox = math.floor(GetLocal().pos.x / 32),
+        poy = math.floor(GetLocal().pos.y / 32),
+        mgx = 29,
+        mgy = 186,
+        blockid = 15158, -- block pog id
+        autocollect = true, 
+        eat = false,
+        Lonely = false,
+        facing = "right"
+    },
+
+    Pm = {
+        Webhookk = "https://discord.com/api/webhooks/1334875628918411329/-5UO48RQufSyxUT9LOcv0-sjkrknN-A_wFz14B2rUeARMJNFHT0kcR86k1hf7Rbmgw93",
+        idDiscord = "" --id dc
+    }
+}
+
+-- [[ Touch it Is A Gay and go to hell ]] --
+
+
+
+
+
+function allbout(tis)
+    local days = math.floor(tis / 86400)
+    totalSeconds = tis % 86400
+    local hours = math.floor(totalSeconds / 3600)
+    totalSeconds = totalSeconds % 3600
+    local minutes = math.floor(totalSeconds / 60)
+    local seconds = totalSeconds % 60
+    return days, hours, minutes, seconds
+end
+
+uS = function(a)
+    SendVariantList({[0] = "OnTextOverlay", [1] = a})
+    LogToConsole(a)
+end
+
+pH = function(s)
+    SendPacket(2, "action|input\n|text|" .. s)
+end
+
+pH("`b[`eDoctor`b] `0Pnb Public On")
+Sleep(1230)
+
+jL = false
+Cheat = function(S)
+     aC = debug.pnb.autocollect and 1 or 0
+     aA = debug.pnb.Lonely and 1 or 0
+    SendPacket(2, "action|dialog_return\ndialog_name|cheats\ncheck_autofarm|" .. S .. "\ncheck_bfg|" .. S .. "\ncheck_gems|" .. aC .. "\ncheck_ignoref|" .. aA)
+    Sleep(2^2 * 5^3)
+end
+
+pO = function(x, y)
+    local px, py = math.floor(GetLocal().pos.x / 32), math.floor(GetLocal().pos.y / 32)
+    if GetTile(x, y) then
+        uS("`b[`eDoctor`b] `0Finding Magplant")
+        for i = -1, 1 do
+            for j = -1, 1 do
+                if GetTile(x + i, y + j) then
+                    FindPath(x + i + 1, y + j + 1)
+                    Sleep(8 * 10 * 3)
+                    return
+                end
+            end
+        end
+    else
+        FindPath(x, y)
+        Sleep(300)
+    end
+end
+
+function tW(d)
+    for _, item in pairs(GetInventory()) do
+        if item.id == d then
+            return item.amount
+        end
+    end
+    return 0
+end
+
+mPa = function(str)
+    str = str:gsub("Dr%.", "")
+    str = str:gsub("``", ""):gsub("`.", ""):gsub("@", ""):gsub(" of Legend", "")
+    str = str:gsub("%[BOOST%]", ""):gsub("%[ELITE%]", ""):gsub("`w", "")
+    return str
+end
+
+function fR(number)
+    return tostring(number):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+end
+
+put = function(x, y, id)
+    SendPacketRaw(false, { type = 3, x = x * 32, y = y * 32, px = x, py = y, value = id })
+end
+
+cVs = 30 * 60 + 2
+nXt = os.time() + cVs
+
+yHa = function(x, y)
+    local pkt = {
+        type = 3,
+        value = 32,
+        state = 8,
+        px = x,
+        py = y,
+        x = GetLocal().pos.x,
+        y = GetLocal().pos.y
+    }
+    SendPacketRaw(false, pkt)
+    Sleep(500)
+end
+
+function MagGot()
+    local Found = {}
+    local count = 0
+    for x = debug.pnb.mgx, 1, -1 do
+        local y = debug.pnb.mgy
+        if GetTile(x, y).fg == 5638 then
+            count = count + 1
+            table.insert(Found, { x + count, y })
+        end
+    end
+    return Found
+end
+
+CRNTMAG = 1
+rT = false
+
+GetRemote = function()
+    local Magplant = MagGot()
+    if Magplant and #Magplant > 0 then
+        local currentMag = Magplant[CRNTMAG]
+        local trx, try = currentMag[1], currentMag[2]
+        pO(trx, try)
+        Sleep(10 * 5^2)
+        yHa(trx, try)
+        SendPacket(2, "action|dialog_return\ndialog_name|magplant_edit\nx|" .. trx .. "|\ny|" .. try .. "|\nbuttonClicked|getRemote")
+        Sleep(40 * 2^4)
+        FindPath(debug.pnb.pox, debug.pnb.poy)
+        Sleep(25 * 2^5)
+        Cheat(1)
+        Sleep(100 * 20)
+        uS("`b[`4Doctor`b] `0Success Take Remote")
+        pTs = false
+    else
+        pTs = true
+        uS("`b[`4Doctor`b] `4No Magplants found!")
+    end
+end
+
+mPW = GetPlayerInfo().gems
+nS = mPa(GetLocal().name):match("%S+")
+tC = 0
+worlds = string.upper(GetWorld().name)
+sJ = true
+
+cP = function()
+    if sJ and debug.pnb.eat then
+        Consumable = { 4604, 1056, 528 }
+        for _, G in pairs(Consumable) do
+            if tW(G) > 0 then
+                put(debug.pnb.pox, debug.pnb.poy, G)
+                uS("`b[`eDoctor`b] `cConsum Eat " .. G)
+                Sleep(15 * 40 * 2)
+                rT = true
+                sJ = false
+            elseif os.time() >= nXt then
+                Cheat(0)
+                Sleep(10 * 20)
+                for _, G in pairs(Consumable) do
+            if tW(G) > 0 then
+                put(debug.pnb.pox, debug.pnb.poy, G)
+                uS("`b[`eDoctor`b] `cConsum Eat " .. G)
+                Sleep(15 * 40 * 2)
+                rT = true
+                Cheat(1)
+                Sleep(15 * 40 * 2)
+                nXt = os.time() + cVs
+            end
+        end
+    end
+
+    if GetWorld() == nil or GetWorld().name ~= worlds then
+        SendPacket(3, "action|join_request\nname|" .. worlds .. "|\ninvitedWorld|0")
+        uS("`b[`eDoctor`b] `cBack `0World...")
+        Sleep(40 * 20 * 3)
+        jL = false
+        pTs = true
+        rT = false
+        GetRemote()
+        tC = 0
+        Sleep(40 * 20 * 2 )
+    else
+        if rT then
+            GetRemote()
+            rT = false
+        else
+            xS, yS = debug.pnb.pox, debug.pnb.poy
+            vP = GetTile(xS + (debug.pnb.facing:lower() == "right" and 1 or -1), yS)
+            gK = type(vP) == "table" and vP.fg
+            if (gK ~= debug.pnb.blockid) then
+                tC = tC + 1
+            else
+                tC = 0
+            end
+
+            if tC > 40 then
+                Cheat(0)
+                uS("`b[`eDoctor`b]`wMagplant is `4Empty!")
+                CRNTMAG = CRNTMAG + 1
+                magPlants = MagGot()
+                if CRNTMAG > #magPlants then
+                    CRNTMAG = 1
+                end
+                GetRemote()
+                tC = 0
+            end
+        end
+    end
+end
+
+sTrS = os.time()
+cPu = os.time()
+tis = cPu - sTrS
+days, hours, minutes, seconds = allbout(tis)
+local myData = [[
+    {
+      "embeds": [
+        {
+          "title": "Pnb Public Webhook",
+          "fields": [
+            { "name": "<a:aOnline:1089435878583173200> Player Name", "value": "]] .. nS .. [[\n<@]] .. debug.Pm.idDiscord .. [[>", "inline": false },
+            { "name": "<:dumbgem:1326955694561165422> Player Gems", "value": "]] .. fR(mPW) .. [[", "inline": false },
+            { "name": "<:growscan:1210567190022070312> Stock Consumable", "value": "<:arroz:1327232790307016765> ]] .. tW(4604) .. [[  <:clov:1327232687127138314> ]] .. tW(528) .. [[  <:songpyeon:1327232868950474794> ]] .. tW(1056) .. [[", "inline": false },
+            { "name": "<:globee:1326955204263805001> World Name", "value": "]] .. worlds .. [[", "inline": false },
+            { "name": "<:magplant:1267643788059480205> Magplant Position", "value": "(]] .. MagGot()[CRNTMAG][1] .. [[ , ]] .. MagGot()[CRNTMAG][2] .. [[)", "inline": false },
+            { "name": "<:nuke:1327228383808978986> Position Break", "value": "]] .. debug.pnb.pox .. [[, ]] .. debug.pnb.poy .. [[", "inline": false },
+            { "name": "Pnb Time!", "value": ":timer: ETA: ]] .. days .. [[ days ]] .. hours .. [[ hours ]] .. minutes .. [[ minute ]] .. seconds .. [[ second", "inline": false }
+          ],
+          "color": 16777215,
+          "thumbnail": {
+            "url": "https://cdn.discordapp.com/attachments/1256995873456394331/1333287130381684819/freetoedit.jpg?ex=679857e7&is=67970667&hm=ccf1a4316938daefd10b24aada0b96002d8361c2d03aa7050223a725d50b8968&"
+          }
+        }
+      ]
+    }
+]]
+
+if not lSt or os.time() - lSt >= 600 then
+    MakeRequest(debug.Pm.Webhookk, "POST", { ["Content-Type"] = "application/json" }, myData)
+    lSt = os.time()
+end
+
+-- [[ you are dumbs on here ]] --
+
+lSt = nil
+rT = true
+repeat
+    cP()
+    Sleep(200)
+until false
+
+-- [[ you are dumbs on here ]] --

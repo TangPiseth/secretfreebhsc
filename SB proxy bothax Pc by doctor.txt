@@ -1,0 +1,210 @@
+-- [[ DONT RESELL ]] --
+-- [[ BY DOCTOR ]] --
+-- [[ JANGAN LUPA NYALAIN OS ]] --
+Running = false -- Jangan sentuh
+local text = "" -- Jangan sentuh
+sb = 0 -- Jangan sentuh
+WORLD = "KDLX" -- World yang akan dituju jika selesai SB
+Sponsor = true -- True jika menggunakan fitur sponsor kayak Residents[KDLX]
+local initial_time -- dont touch
+local prefixs = {
+    "`1", "`2", "`3", "`4", "`5", "`9", "`c", "`o", "`b", "`8", "`e", "`^", "`0"
+} -- Jangan sentuh / jika ingin, tambahkan kode warna
+
+
+
+
+
+
+
+-- [[ DONT TOUCH HERE ELGATO NIGAS ]] --
+
+SendVariantList{
+    [0] = "OnDialogRequest", 
+    [1] = [[set_default_color||
+add_label_with_icon|big|`oWelcome|left|2480|
+add_spacer|small|
+add_textbox| DATE : `2]]..os.date("%d-%m-%Y")..[[|
+add_textbox|   `oThanks for Using Sb Helper`|
+add_textbox|   `oOriginal script by : `9Doctorr|
+add_spacer|small|
+add_label_with_icon|small|`wAktifin /ghost command If mod.|left|5244|
+add_spacer|small|
+add_label_with_icon|small|`0Use /Menu to see menu cmd.|left|1752|
+add_spacer|small|
+add_url_button||`w"`qDiscord Server  `bScripts```w"``|NOFLAGS|https://discord.com/invite/PM3YrhF3GW|`0Free `9CreativePS `0Scripts for `2GrowLauncher. `bJOIN NOW!``|0|0|
+add_spacer|small|
+add_quick_exit|
+end_dialog|c|Exit|]]
+}
+
+posX = GetLocal().pos.x // 32
+posY = GetLocal().pos.y // 32
+
+function Texting(ganoelnub)
+    SendPacket(2, "action|input\n|text|"..ganoelnub)
+end
+
+function format_number(n)
+    local str = tostring(n)
+    local formatted = str:reverse():gsub("(%d%d%d)", "%1,")
+    return formatted:reverse():gsub("^,", "")
+end
+
+function State(x, y)
+    SendPacketRaw(false, {
+        type = 0,
+        x = x * 32 or GetLocal().pos.x,
+        y = y * 32 or GetLocal().pos.y,
+        state = 0,
+        xspeed = 300
+    })
+end
+
+Texting("`4Start Script `1Sb By `9Doctor")
+Sleep(1600)
+
+Texting("`b Lock Positioning `4" .. posX .. " `0, `2" .. posY)
+Sleep(1500)
+
+local count = 0
+local total_time = sb * 90
+sigma = false
+local total_gems = 0
+local gems_used = 0
+AddHook("onvariant", "hook", function(var)
+    if var[0] == "OnConsoleMessage" then
+        if var[1]:find("sent.") then
+            local gems_used_str = var[1]:match("(%d+) Gems")
+            gems_used = tonumber(gems_used_str) or 0
+            total_gems = gems_used + total_gems
+            LogToConsole("`9Gems Used : "..total_gems)
+            
+            sigma = false  
+        elseif var[1]:find("pending one.") then
+            gems_used = 0  
+            sigma = true
+            LogToConsole("pending bosku: "..gems_used) 
+        end
+    end
+end)
+
+AddHook("onsendpacket", "packet", function(type, pkt)
+    if pkt:find("/Menu") then 
+        SendVariantList{
+            [0] = "OnDialogRequest", 
+            [1] = [[set_default_color||
+add_label_with_icon|big|`0Menu `9SuperBroadcast By `cDoctorr|left|2480|
+add_spacer|big|
+add_label_with_icon|small|`0Command Helper Broadcast|left|1752|
+add_spacer|small|
+add_label_with_icon|small|`0/set {`8Amount`b} For Setting In Hours|left|482|
+add_spacer|small|
+add_label_with_icon|small|`0/cs `b{`8Amount`b} For Setting Basicly Like Count Sb|left|482|
+add_spacer|small|
+add_label_with_icon|small|`0/tx `b{`8Your Text`b} Setting Your text|left|482|
+add_spacer|small|
+add_label_with_icon|small|`0Use /Start if want running script|left|482|
+add_spacer|small|
+add_quick_exit||
+end_dialog|cmdend|Exit|]]
+        }
+        return true
+    elseif pkt:find("/start") then
+        Running = true
+        initial_time = os.time() -- Store the initial time here
+        local end_time_seconds = initial_time + sb * 90
+        end_time = os.date("%H:%M", end_time_seconds)
+        return true
+    elseif pkt:find("/set (%d+)") then    
+        local hours = tonumber(pkt:match("/set (%d+)"))
+        if hours then
+            sb = hours * 40
+            Texting("Your Sb Set To " .. hours .. " hour" .. (hours > 1 and "s" or ""))
+            return true
+        end
+    elseif pkt:find("/cs (%d+)") then 
+        local count = tonumber(pkt:match("/cs (%d+)"))
+        if count then
+            sb = count
+            Texting("Your Setting Sb Set To " .. count .. " time" .. (count > 1 and "s" or ""))
+            return true
+        end
+    elseif pkt:find("/tx (.+)") then
+        if Running then
+            LogToConsole("SB STOPPED")
+            Running = false
+        else
+            text = pkt:match("/tx (.+)")
+            Texting("Your Sb Text on: " .. text)
+            LogToConsole("Your Sb Text Set: " .. text)
+        end
+        return true            
+    end
+    return false
+end)
+
+names = GetLocal().name:match("%S+")
+local st = string.upper(GetWorld().name)
+
+
+while true do
+    if Running then
+        count = count + 1
+        local current_time = os.date("%H:%M", initial_time)
+
+        if GetWorld() == nil or GetWorld().name ~= st then
+            SendPacket(3, "action|join_request\nname|"..st.."|\ninvitedWorld|0")
+            Sleep(1000)
+            State(posX, posY)
+            Sleep(800)
+            Texting("`9Back Position")
+            Sleep(1020)
+        end
+
+        local randomPrefix = prefixs[math.random(1, #prefixs)]
+        if Sponsor then
+            Texting("/nick " .. names .. randomPrefix .. "[" .. st .. "]")
+            Sleep(960)
+        end
+
+        Texting("/sb " .. text.." `0[`4ResidentSb`0]")       
+        Sleep(1000)
+        
+        
+        local appearance_time = count * 1.5
+        local total_time_sb = sb * 1.5
+
+        
+        Texting("`4[`9Residents`4] `0Total Minute Appearance `0= `4" .. string.format("%.2f", appearance_time) .. " `0Min `b/ `!" .. string.format("%.2f", total_time_sb).." `0Min")
+        Sleep(1200)
+
+        if not sigma then
+            Texting("Total Gems = " .. format_number(total_gems) .. " (gems)")
+            Sleep(1300)
+        else
+            SendPacket(2, "action|input\n|text|`^Super Broadcast Blocked")
+            Sleep(1050)
+            Texting("`9Total Gems = `b" .. format_number(total_gems) .. " (gems)")
+            Sleep(1040)
+        end
+
+        if count < sb then
+            Sleep(90000) -- Sleep untuk jangka waktu antara SB
+        end
+
+        if count == sb then    
+            Texting("Broadcast (megaphone) Ended, Thanks (love)")
+            Sleep(3000)    
+            SendPacket(2, "action|input\n|text|/warp " .. WORLD)
+            Sleep(2000)
+            Running = false
+            count = 0
+            sb = 0
+           appearance_time = 0
+        total_time_sb = 0
+        end
+    else
+        Sleep(2000)
+    end
+end

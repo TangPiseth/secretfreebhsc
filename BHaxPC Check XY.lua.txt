@@ -1,0 +1,31 @@
+--[Tile check]
+--[Punch to block]
+
+
+
+
+
+
+
+
+
+
+--[Main Script]
+SendVariantList({[0] = "OnDialogRequest", [1] = [[
+set_default_color|`w
+add_label_with_icon|small|`8BooLua Community|left|2918|
+add_spacer|small|
+add_label_with_icon|small|`5VIP `b- `5Free Scripts CPS|left|1368|
+add_label_with_icon|small|`eGL `b- `2BotHax `b- `8GPai|left|1368|
+add_label_with_icon|small|`6Report Bug Script|left|1368|
+add_label_with_icon|small|`3Request Script|left|1368|
+add_spacer|small|
+add_url_button||`qDiscord``|NOFLAGS|https://discord.gg/Any9dcWNwE|`$BooLua Community.|0|0|
+add_smalltext|`9Need more scripts?!Join now!|
+add_quick_exit|]]})
+AddHook("onsendpacketraw", "hook", function(pkt)
+	if pkt.type == 3 then
+		SendPacket(2, "action|input\ntext|`#X : `3" .. pkt.px .. " `6Y : `9" .. pkt.py)
+	end
+	return false
+end)

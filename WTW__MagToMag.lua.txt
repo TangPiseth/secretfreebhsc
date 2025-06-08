@@ -1,0 +1,42 @@
+Delay_Enter = 5000
+----------------------
+World_Take = "input your world name" -- masukin nama world yang buat di take / retrieve
+Magplant_Take = {1, 2} -- tiles magplantmu
+----------------------
+World_Put = "input your world name" -- masukin nama world yang buat di put mag
+Magplant_Put = {3, 4} --tiles magplantmu
+----------------------
+
+AddHook(function(k)
+    if k.v1 == "OnDialogRequest" and k.v2:find("MAGPLANT") then
+        return true
+      end
+  return false
+end, "OnVariant")
+
+function wrench(x, y)
+    SendPacketRaw(false, {type = 3, value = 32, px = x, py = y, x = GetLocal().posX, y = GetLocal().posY})
+end
+
+function warp(x)
+    SendPacket(3, "action|input\n|text|/wp "..x)
+end
+
+while true do
+    warp(World_Take)
+    Sleep(Delay_Enter)
+    FindPath(Magplant_Take[1]-1, Magplant_Take[2]-1)
+    Sleep(300)
+    wrench(Magplant_Take[1]-1, Magplant_Take[2])
+    Sleep(100)
+    SendPacket(2, "action|dialog_return\ndialog_name|magplant_edit\nx|"..(Magplant_Take[1]-1).."|\ny|"..(Magplant_Take[2]).."|\nbuttonClicked|withdraw")
+    Sleep(1000)
+    warp(World_Put)
+    Sleep(Delay_Enter)
+    FindPath(Magplant_Put[1]-1, Magplant_Put[2]-1)
+    Sleep(300)
+    wrench(Magplant_Put[1]-1, Magplant_Put[2])
+    Sleep(100)
+    SendPacket(2, "action|dialog_return\ndialog_name|magplant_edit\nx|"..(Magplant_Put[1]-1).."|\ny|"..(Magplant_Put[2]).."|\nbuttonClicked|additems")
+    Sleep(1000)
+end
