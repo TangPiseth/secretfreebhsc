@@ -643,11 +643,10 @@ function var(var)
 
     if var.v1:find("OnTalkBubble") and var.v3 and var.v3:find("spun the wheel") then 
         if reme == true or qeme == true then
-            local num = string.gsub(string.gsub(var.v3:match("and got (.+)") or "", "!%]", ""), "`", "")
-            local onlynumber = string.sub(num, 2)
-            local clearspace = string.gsub(onlynumber, " ", "")
-            local h = string.gsub(string.gsub(clearspace, "!7", ""), "]", "")
-            local number = tonumber(h)
+            local result_text = var.v3:match("and got (.+)") or ""
+            local cleaned_text = string.gsub(result_text, "[`!%[%]]", "")
+            local number_text = string.gsub(cleaned_text, "%D", "")
+            local number = tonumber(number_text)
             if number then
                 SendVariant({v0 = var.v1, v1 = var.v2, v2 = "`5(`9REAL`5) "..var.v3.." "..getGame(number), v3 = var.v4})
             else
